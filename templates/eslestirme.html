@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Eşleştirme Sonuç Raporu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .card { border: none !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-4 mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+            <h2>Sistem Atama ve Yerleştirme Sonuçları</h2>
+            <div>
+                <a href="/" class="btn btn-secondary fw-bold me-2">Ana Panele Dön</a>
+                <button onclick="window.print()" class="btn btn-primary fw-bold">Raporu Yazdır (PDF)</button>
+            </div>
+        </div>
+
+        <!-- YERLEŞEN ÖĞRENCİLER -->
+        {% for ad, veri in sonuclar.items() %}
+        <div class="card shadow border-dark mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-uppercase">{{ ad }}</h5>
+                <span class="badge bg-light text-dark fs-6">{{ veri.turu }} Alımı | Doluluk: {{ veri.doluluk }}</span>
+            </div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>T.C. Kimlik</th>
+                            <th>Ad Soyad</th>
+                            <th>Puanı</th>
+                            <th>Doğum Tarihi</th>
+                            <th>Özel Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ogrenci in veri.ogrenciler %}
+                        <tr class="{% if 'Yok' not in ogrenci.ozel_durum_kodu %}table-warning{% endif %}">
+                            <td>{{ ogrenci.tc_kimlik }}</td>
+                            <td><strong>{{ ogrenci.ad_soyad }}</strong></td>
+                            <td class="fw-bold text-success">
+                                {% if 'Yok' not in ogrenci.ozel_durum_kodu %}
+                                    <span class="badge bg-success">Komisyon Kararı (Muaf)</span>
+                                {% else %}
+                                    {{ ogrenci.lgs_puani if veri.turu == 'LGS' else ogrenci.obp_puani }}
+                                {% endif %}
+                            </td>
+                            <td>{{ ogrenci.dogum_tarihi }}</td>
+                            <td>
+                                {% if 'Yok' not in ogrenci.ozel_durum_kodu %}
+                                    <span class="badge bg-danger">{{ ogrenci.ozel_durum_kodu }}</span>
+                                {% else %}
+                                    Yok (Normal Öğrenci)
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Bu okula henüz öğrenci yerleşmedi.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- AÇIKTA KALANLAR (ÖRGÜN) -->
+        <div class="card shadow border-danger mt-5">
+            <div class="card-header bg-danger text-white text-center">
+                <h4 class="mb-0">Yerleşemeyen / Yedek Öğrenciler (Kontenjan Dışı)</h4>
+            </div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>T.C. Kimlik</th>
+                            <th>Ad Soyad</th>
+                            <th>OBP Puanı</th>
+                            <th>Doğum Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ogrenci in aciktakiler %}
+                        <tr>
+                            <td>{{ ogrenci.tc_kimlik }}</td>
+                            <td><strong>{{ ogrenci.ad_soyad }}</strong></td>
+                            <td>{{ ogrenci.obp_puani }}</td>
+                            <td>{{ ogrenci.dogum_tarihi }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 fw-bold text-success">Açıkta kalan öğrenci bulunmuyor. Tüm öğrenciler yerleşti!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- KOMİSYON ONAYI BEKLEYEN ÖZEL GEÇİŞLER (MESEM / AÇIK LİSE) -->
+        {% if komisyon_bekleyenler|length > 0 %}
+        <div class="card shadow border-info mt-5 mb-5">
+            <div class="card-header bg-info text-white text-center">
+                <h4 class="mb-0">Komisyon Değerlendirmesindeki Öğrenciler (Açık Lise / MESEM)</h4>
+            </div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-info">
+                        <tr>
+                            <th>T.C. Kimlik</th>
+                            <th>Ad Soyad</th>
+                            <th>Geçiş Talebi</th>
+                            <th>Doğum Tarihi</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ogrenci in komisyon_bekleyenler %}
+                        <tr>
+                            <td>{{ ogrenci.tc_kimlik }}</td>
+                            <td><strong>{{ ogrenci.ad_soyad }}</strong></td>
+                            <td>
+                                {% if 'MESEM' in ogrenci.talep_turu %}
+                                    <span class="badge bg-primary">{{ ogrenci.talep_turu }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ ogrenci.talep_turu }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ogrenci.dogum_tarihi }}</td>
+                            <td>
+                                {% if ogrenci.islem_durumu == 'Onaylandı' %}
+                                    <span class="badge bg-success">Onaylandı</span>
+                                {% elif ogrenci.islem_durumu == 'Reddedildi' %}
+                                    <span class="badge bg-danger">Reddedildi</span>
+                                {% else %}
+                                    <span class="badge bg-secondary border">Beklemede</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>

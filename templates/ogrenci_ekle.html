@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yeni Öğrenci Kaydı</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5 mb-5">
+        <h2 class="text-center mb-4">Öğrenci Veri ve Talep Giriş Paneli</h2>
+        <div class="row">
+            <!-- MANUEL VERİ GİRİŞİ (Sol Taraf) -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow border-primary h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0 text-center">Tekli Öğrenci & Talep Kaydı</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="/ogrenci_ekle" method="POST">
+                            
+                            <!-- YENİ EKLENEN TALEP TÜRÜ ALANI -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-primary">Kayıt / Talep Türü</label>
+                                <select class="form-select border-primary" name="talep_turu" required>
+                                    <option value="Yeni Kayıt">Normal Yerleştirme </option>
+                                    <option value="Örgün Nakil Talebi">Örgün Öğretim Nakil Talebi</option>
+                                    <option value="Açık Lise Geçiş Talebi">Açık Lise Geçiş Talebi</option>
+                                    <option value="MESEM Geçiş Talebi">MESEM Geçiş Talebi</option>
+                                </select>
+                                <small class="text-muted">Seçilen talep, ana paneldeki komisyon istatistiklerine yansıyacaktır.</small>
+                            </div>
+                            <hr>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">T.C. Kimlik No</label>
+                                <input type="text" class="form-control" name="tc_kimlik" required maxlength="11">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Ad Soyad</label>
+                                <input type="text" class="form-control" name="ad_soyad" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Doğum Tarihi</label>
+                                <input type="date" class="form-control" name="dogum_tarihi" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-success">İkametgah (Kayıt Alanı) Durumu</label>
+                                <select class="form-select border-success" name="kayit_alani">
+                                    <option value="Kayit_Alaninda">Kayıt Alanında (Öncelikli)</option>
+                                    <option value="Komsu_Kayit_Alani">Komşu Kayıt Alanında</option>
+                                    <option value="Diger">Diğer (Alan Dışı)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-danger fw-bold">LGS Puanı</label>
+                                <input type="number" step="0.0001" class="form-control" name="lgs_puani" placeholder="Sınava girmediyse boş bırakın">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-primary fw-bold">OBP Puanı</label>
+                                <input type="number" step="0.0001" class="form-control" name="obp_puani" required>
+                            </div>
+                            
+                            <hr>
+                            <h6 class="text-secondary fw-bold">Okul Tercihleri</h6>
+                            <div class="mb-2">
+                                <label class="form-label fw-bold">1. Tercih Ettiği Okul</label>
+                                <input type="text" class="form-control" name="tercih_1" required placeholder="Okul adını tam girin">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label fw-bold">2. Tercih Ettiği Okul</label>
+                                <input type="text" class="form-control" name="tercih_2">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">3. Tercih Ettiği Okul</label>
+                                <input type="text" class="form-control" name="tercih_3">
+                            </div>
+                            <hr>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Özel Durum (Komisyon Muafiyeti)</label>
+                                <select class="form-select bg-light" name="ozel_durum">
+                                    <option value="Yok">Yok (Normal Öğrenci)</option>
+                                    <option value="Gazi_Sehit">Gazi / Şehit Çocuğu</option>
+                                    <option value="Korunma_Karari">Korunma / Bakım Kararı</option>
+                                    <option value="Milli_Sporcu">Milli Sporcu</option>
+                                    <option value="Ozel_Egitim">Özel Eğitim (RAM Raporlu)</option>
+                                    <option value="Yurt_Disi">Yurt Dışı Denklik Belgesi</option>
+                                </select>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary fw-bold">Sisteme Kaydet</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXCEL İLE TOPLU YÜKLEME (Sağ Taraf) -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow border-success h-100">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0 text-center">Excel ile Toplu Yükleme</h4>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="text-muted text-center mt-2">E-Okul'dan aldığınız listeyi aşağıdaki sütun başlıklarına göre düzenleyip sisteme aktarabilirsiniz.</p>
+                        
+                        <div class="alert alert-warning p-3 small text-center mt-3 mb-4">
+                            <strong>Gerekli Excel Sütun Başlıkları:</strong><br><br>
+                            <span class="fw-bold">TC Kimlik | Ad Soyad | Doğum Tarihi | Kayıt Alanı | Talep Türü | LGS Puanı | OBP Puanı | Özel Durum | Tercih 1 | Tercih 2 | Tercih 3</span>
+                        </div>
+                        
+                        <div class="alert alert-info p-3 small text-center mb-4">
+                            <strong>Önemli Not:</strong> Eğer öğrenci özel bir geçiş/nakil talep ediyorsa, Excel'deki <strong>Talep Türü</strong> sütununa <code>Örgün Nakil Talebi</code>, <code>Açık Lise Geçiş Talebi</code> veya <code>MESEM Geçiş Talebi</code> yazmanız yeterlidir. Aksi halde bu sütunu boş bırakabilirsiniz (Sistem otomatik 'Yeni Kayıt' kabul eder).
+                        </div>
+
+                        <form action="/excel_yukle" method="POST" enctype="multipart/form-data" class="mt-auto">
+                            <div class="mb-4">
+                                <input class="form-control form-control-lg border-success" type="file" name="excel_dosyasi" accept=".xlsx, .xls" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Excel Listesini İçeri Aktar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <a href="/" class="btn btn-secondary fw-bold px-5">Ana Panele Dön</a>
+        </div>
+    </div>
+</body>
+</html>
