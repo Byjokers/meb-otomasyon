@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MEB Nakil Kontrol Paneli</title>
+    <!-- Bootstrap CSS ve İkonlar -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --kamu-lacivert: #0f3a64;
+            --kamu-kirmizi: #e30a17;
+        }
+        /* Ekranın en altına imzanın yapışması için flex kullanıldı */
+        body { 
+            background-color: #f1f4f6; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        /* Aksiyon butonları hover efekti */
+        .transition-hover {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .transition-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+            filter: brightness(1.05);
+        }
+        /* Resmi ve Şık Navbar */
+        .navbar-custom {
+            background-color: var(--kamu-lacivert);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--kamu-kirmizi);
+            padding: 10px 0;
+        }
+        .navbar-custom .navbar-brand {
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            color: #ffffff !important;
+        }
+        .navbar-custom .nav-link { 
+            font-weight: 500; 
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.85) !important;
+            margin: 0 4px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .navbar-custom .nav-link:hover, .navbar-custom .nav-link.active { 
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff !important; 
+        }
+        .yonetim-btn {
+            background-color: rgba(227, 10, 23, 0.9) !important;
+            color: #ffffff !important;
+        }
+        .yonetim-btn:hover {
+            background-color: var(--kamu-kirmizi) !important;
+        }
+        
+        /* İstatistik Kartları */
+        .stat-card { 
+            border: none; 
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid transparent;
+        }
+        .card-orgun { border-left-color: #0d6efd; }
+        .card-acik { border-left-color: #ffc107; }
+        .card-mesem { border-left-color: #198754; }
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.2;
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+        }
+
+        /* Yeni Eklenen Hızlı Erişim Kartlarının Tasarımı */
+        .quick-action-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 12px;
+        }
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1) !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PROFESYONEL ÜST MENÜ (NAVBAR) - ÇİFT SATIRLI TASARIM -->
+    <nav class="navbar navbar-expand-xl navbar-dark navbar-custom mb-4 pb-0">
+        <div class="container-fluid px-4 flex-column align-items-stretch">
+            
+            <!-- ÜST SATIR: Logo, Ana Linkler ve Çıkış -->
+            <div class="d-flex justify-content-between align-items-center w-100 pb-2 border-bottom border-light border-opacity-10">
+                
+                <!-- Sol: Logo -->
+                <a class="navbar-brand fw-bold mb-0" href="/">
+                    <i class="bi bi-bank me-2"></i>İlçe Nakil ve Yerleştirme Modülü
+                </a>
+                
+                <!-- Mobil Menü Açma Butonu -->
+                <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#anaMenu">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Orta: Beyaz Metinli Standart Linkler -->
+                <div class="collapse navbar-collapse justify-content-center" id="anaMenu">
+                    <ul class="navbar-nav mb-2 mb-xl-0 d-flex align-items-center">
+                        <li class="nav-item mx-1"><a class="nav-link px-2" href="/ogrenci_ekle"><i class="bi bi-person-plus me-1"></i>Öğrenci Kaydı</a></li>
+                        <li class="nav-item mx-1"><a class="nav-link px-2" href="/havuz"><i class="bi bi-list-columns-reverse me-1"></i>Havuz</a></li>
+                        <li class="nav-item mx-1"><a class="nav-link px-2" href="/okul_ekle"><i class="bi bi-building-add me-1"></i>Okul Tanımla</a></li>
+                        <li class="nav-item mx-1"><a class="nav-link px-2" href="/okullar"><i class="bi bi-card-list me-1"></i>Okul Listesi</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Sağ: Dönem ve Çıkış -->
+                <div class="d-none d-xl-flex align-items-center">
+                    <span class="text-white opacity-75 me-3 fw-bold" style="font-size: 0.9rem;">
+                        <i class="bi bi-calendar3 me-1"></i>Dönem: {{ veriler.guncel_donem }}
+                    </span>
+                    <a href="/logout" class="btn btn-outline-light btn-sm px-4 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-power me-1"></i>Çıkış
+                    </a>
+                </div>
+            </div>
+
+            <!-- ALT SATIR: Renkli Aksiyon Butonları (Araç Çubuğu) -->
+            <div class="d-none d-xl-flex justify-content-center py-3 w-100 gap-3">
+                
+                <a class="btn btn-success px-4 py-2 shadow-sm d-flex align-items-center fw-bold rounded-3 transition-hover" href="/eslestirme">
+                    <i class="bi bi-gear-fill me-2 fs-5"></i>Eşleştirme Motoru
+                </a>
+                
+                <a class="btn btn-warning text-dark px-4 py-2 shadow-sm d-flex align-items-center fw-bold rounded-3 transition-hover" href="/komisyon">
+                    <i class="bi bi-ui-checks me-2 fs-5"></i>Komisyon Onayı
+                </a>
+                
+                <a class="btn btn-info text-dark px-4 py-2 shadow-sm d-flex align-items-center fw-bold rounded-3 transition-hover" href="/tutanak_indir">
+                    <i class="bi bi-file-earmark-excel-fill me-2 fs-5"></i>Komisyon Tutanağı
+                </a>
+                
+                <!-- Yönetim Açılır Menüsü -->
+                <div class="dropdown">
+                    <button class="btn btn-danger px-4 py-2 shadow-sm d-flex align-items-center fw-bold rounded-3 transition-hover dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-shield-lock-fill me-2 fs-5"></i>Yönetim
+                    </button>
+                    <ul class="dropdown-menu shadow-lg border-0 mt-2 rounded-3">
+                        <li><a class="dropdown-item fw-bold text-success py-2" href="#" data-bs-toggle="modal" data-bs-target="#kullaniciEkleModal"><i class="bi bi-person-plus me-2"></i>Yeni Kullanıcı Ekle</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2" href="/kullanicilar"><i class="bi bi-people me-2"></i>Kullanıcıları Yönet</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- SAYFA İÇERİĞİ KISMI -->
+    <div class="container flex-grow-1">
+        
+        <!-- AÇIK MAVİ ALAN (KONTROL PANELİ) -->
+        <div class="p-4 rounded-4 shadow-sm mb-5" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 1px solid #90caf9;">
+            
+            <div class="mb-4 px-2">
+                <h3 class="text-dark fw-bold mb-1"><i class="bi bi-speedometer2 me-2 text-primary"></i>Kontrol Paneli</h3>
+                <p class="text-muted mb-0">Sistemdeki güncel işlem bekleyen talep özetleri.</p>
+            </div>
+
+            <!-- İSTATİSTİK KARTLARI -->
+            <div class="row gap-4 justify-content-center mb-2">
+                <div class="col-md-3 p-0">
+                    <div class="card stat-card card-orgun bg-white h-100 position-relative overflow-hidden">
+                        <div class="card-body p-4">
+                            <h6 class="text-muted text-uppercase fw-bold mb-1">Örgün Öğretim</h6>
+                            <h1 class="display-4 fw-bold text-primary mb-0">{{ veriler.orgun_nakil }}</h1>
+                            <span class="badge bg-primary-subtle text-primary mt-2">Bekleyen Nakil Talebi</span>
+                            <i class="bi bi-backpack stat-icon text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 p-0">
+                    <div class="card stat-card card-acik bg-white h-100 position-relative overflow-hidden">
+                        <div class="card-body p-4">
+                            <h6 class="text-muted text-uppercase fw-bold mb-1">Açık Lise</h6>
+                            <h1 class="display-4 fw-bold text-warning mb-0">{{ veriler.acik_lise }}</h1>
+                            <span class="badge bg-warning-subtle text-warning mt-2">Bekleyen Geçiş Talebi</span>
+                            <i class="bi bi-book stat-icon text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 p-0">
+                    <div class="card stat-card card-mesem bg-white h-100 position-relative overflow-hidden">
+                        <div class="card-body p-4">
+                            <h6 class="text-muted text-uppercase fw-bold mb-1">MESEM</h6>
+                            <h1 class="display-4 fw-bold text-success mb-0">{{ veriler.mesem }}</h1>
+                            <span class="badge bg-success-subtle text-success mt-2">Bekleyen Geçiş Talebi</span>
+                            <i class="bi bi-tools stat-icon text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAYFA BOŞ KALMASIN DİYE EKLENEN ŞIK "HIZLI İŞLEMLER" BÖLÜMÜ -->
+        <div class="px-2 mb-4">
+            <h5 class="text-secondary fw-bold mb-3"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Hızlı İşlemler</h5>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <a href="/ogrenci_ekle" class="text-decoration-none">
+                        <div class="card quick-action-card shadow-sm border-0 h-100 bg-white">
+                            <div class="card-body d-flex align-items-center p-3">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3 text-primary">
+                                    <i class="bi bi-person-plus-fill fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">Yeni Öğrenci Kaydı</h6>
+                                    <small class="text-muted">Sisteme yeni aday ekleyin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/havuz" class="text-decoration-none">
+                        <div class="card quick-action-card shadow-sm border-0 h-100 bg-white">
+                            <div class="card-body d-flex align-items-center p-3">
+                                <div class="bg-info bg-opacity-10 p-3 rounded-circle me-3 text-info">
+                                    <i class="bi bi-list-columns-reverse fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">Öğrenci Havuzu</h6>
+                                    <small class="text-muted">Tüm öğrencileri listeleyin</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/eslestirme" class="text-decoration-none">
+                        <div class="card quick-action-card shadow-sm border-0 h-100 bg-white">
+                            <div class="card-body d-flex align-items-center p-3">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3 text-success">
+                                    <i class="bi bi-gear-fill fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">Eşleştirme Motoru</h6>
+                                    <small class="text-muted">Yerleştirme algoritmasını başlatın</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- İMZA VE TELİF ALANI (SENİN ORİJİNAL İMZANLA GERİ GELDİ) -->
+    <div class="w-100 mt-auto">
+        <footer class="py-3 mt-4">
+            <hr class="text-muted opacity-25 m-0 mb-3">
+            <p class="text-center text-muted mb-0 fw-bold">
+                &copy; <script>document.write(new Date().getFullYear())</script> By_joker | Tüm Hakları Saklıdır.
+            </p>
+        </footer>
+    </div>
+
+    <!-- KULLANICI EKLEME MODALI -->
+    <div class="modal fade" id="kullaniciEkleModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+          <form action="/kullanici_ekle" method="POST">
+            <div class="modal-header" style="background-color: var(--kamu-lacivert); color: white;">
+              <h5 class="modal-title"><i class="bi bi-person-plus-fill me-2"></i>Yeni Sistem Kullanıcısı</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+              <div class="mb-3">
+                <label class="fw-bold mb-1">T.C. Kimlik Numarası</label>
+                <input type="text" class="form-control" name="tc_kimlik" maxlength="11" required pattern="\d{11}" placeholder="11 Haneli TC Kimlik">
+              </div>
+              <div class="mb-3">
+                <label class="fw-bold mb-1">Ad Soyad</label>
+                <input type="text" class="form-control" name="ad_soyad" required placeholder="Personelin Adı Soyadı">
+              </div>
+              <div class="mb-4">
+                <label class="fw-bold mb-1">Sistem Rolü (Komisyon Görevi)</label>
+                <select class="form-select" name="komisyon_gorevi" required>
+                  <option value="" disabled selected>Lütfen bir görev seçiniz...</option>
+                  <option value="Sistem Yöneticisi">Sistem Yöneticisi</option>
+                  <option value="İlçe Millî Eğitim Müdürü">İlçe Millî Eğitim Müdürü</option>
+                  <option value="Şube Müdürü-Komisyon Başkanı">Şube Müdürü-Komisyon Başkanı</option>
+                  <option value="Komisyon Üyesi">Komisyon Üyesi</option>
+                  <option value="Şef">Şef (Kısıtlı Yetki)</option>
+                  <option value="Memur">Memur (Kısıtlı Yetki)</option>
+                </select>
+                <div class="form-text text-danger mt-2"><i class="bi bi-exclamation-triangle-fill me-1"></i>Şef ve Memur rollerinin veri silme ve komisyon onayı yetkileri yoktur.</div>
+              </div>
+            </div>
+            <div class="modal-footer bg-light">
+              <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">İptal</button>
+              <button type="submit" class="btn btn-success fw-bold px-4"><i class="bi bi-check-circle me-1"></i>Kaydet ve Şifre Üret</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

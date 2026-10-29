@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kullanıcı Yönetimi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- Navbar / Menü Kısmı -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">LGS Yerleştirme Modülü</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/">Ana Panel</a></li>
+        <li class="nav-item"><a class="nav-link" href="/havuz">Öğrenci Havuzu</a></li>
+        <!-- Üst Menü Yönetim Butonu -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle active" href="#" id="yonetimDropdown" role="button" data-bs-toggle="dropdown">
+                Yönetim
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#kullaniciEkleModal">Yeni Kullanıcı Ekle</a></li>
+                <li><a class="dropdown-item" href="/kullanicilar">Kullanıcıları Yönet</a></li>
+            </ul>
+        </li>
+      </ul>
+      <a href="/logout" class="btn btn-outline-danger btn-sm">Çıkış Yap</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+    <h2 class="mb-4">Komisyon Üyeleri ve Kullanıcılar</h2>
+
+    <!-- Uyarı/Bilgi Mesajlarının (Şifrenin) Görüneceği Alan -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Kullanıcılar Tablosu -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover mt-3">
+                <thead class="table-dark">
+                    <tr>
+                        <th>T.C. Kimlik (Kullanıcı Adı)</th>
+                        <th>Ad Soyad</th>
+                        <th>Komisyon Görevi (Rol)</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for k in kullanicilar %}
+                    <tr>
+                        <td>{{ k.kullanici_adi }}</td>
+                        <td>{{ k.ad_soyad }}</td>
+                        <td><span class="badge bg-primary">{{ k.rol }}</span></td>
+                        <td>
+                            <a href="/kullanici_sil/{{ k.kullanici_adi }}" class="btn btn-sm btn-danger" onclick="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">Sil</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Kullanıcı Ekleme Modalı (Açılır Pencere) -->
+<div class="modal fade" id="kullaniciEkleModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/kullanici_ekle" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title">Yeni Komisyon Üyesi Ekle</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label>T.C. Kimlik Numarası (Giriş İçin)</label>
+            <input type="text" class="form-control" name="tc_kimlik" maxlength="11" required pattern="\d{11}">
+          </div>
+          <div class="mb-3">
+            <label>Ad Soyad</label>
+            <input type="text" class="form-control" name="ad_soyad" required>
+          </div>
+          <div class="mb-3">
+            <label>Komisyon Görevi (Rol)</label>
+            <select class="form-select" name="komisyon_gorevi" required>
+              <option value="Sistem Yöneticisi">Sistem Yöneticisi</option>
+              <option value="İlçe Millî Eğitim Müdürü">İlçe Millî Eğitim Müdürü</option>
+              <option value="Şube Müdürü-Komisyon Başkanı">Şube Müdürü-Komisyon Başkanı</option>
+              <option value="Komisyon Üyesi">Komisyon Üyesi</option>
+              <option value="Şef">Şef</option>
+              <option value="Memur">Memur</option>
+            </select>
+            <small class="text-muted mt-2 d-block">Not: Şef ve Memur rollerinin silme ve onay yetkileri kısıtlanmıştır.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Kaydet ve Şifre Üret</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
